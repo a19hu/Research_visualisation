@@ -21,18 +21,15 @@ class _LoginpageState extends State<Loginpage> {
     String password = _passwordController.text.trim();
 
     try {
-      // Sign in with Firebase
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      // Navigate to Homepage after successful login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Navbarbottom()),
       );
     } on FirebaseAuthException catch (e) {
-      // Show error message if sign-in fails
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Sign-in failed')),
       );
@@ -203,13 +200,11 @@ class _LoginpageState extends State<Loginpage> {
                 await FirebaseAuth.instance
                     .sendPasswordResetEmail(email: emailController.text.trim());
 
-                // Show success message
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Reset link sent to your email")),
                 );
                 Navigator.of(context).pop();
               } on FirebaseAuthException catch (e) {
-                // Show error message
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Error: ${e.message}")),
                 );

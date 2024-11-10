@@ -11,7 +11,7 @@ class Student extends StatefulWidget {
 
 class _StudentState extends State<Student> {
   final TextEditingController projectController = TextEditingController();
- final TextEditingController urlController = TextEditingController();
+  final TextEditingController urlController = TextEditingController();
 
   List<dynamic> mes = [];
   List<Map<String, dynamic>> messages = [];
@@ -27,7 +27,6 @@ class _StudentState extends State<Student> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print(data[0]);
         setState(() {
           mes = data;
         });
@@ -42,17 +41,18 @@ class _StudentState extends State<Student> {
     super.initState();
     fetchData();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        title: Text(
-          "Student",
+        appBar: AppBar(
+          backgroundColor: Colors.orange,
+          title: Text(
+            "Student",
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-   body: Column(
+        body: Column(
           children: [
             Expanded(
               child: ListView.builder(
@@ -64,26 +64,23 @@ class _StudentState extends State<Student> {
                     subtitle: Text(mes[index]['name']!,
                         style: TextStyle(color: Colors.grey)),
                     trailing: Icon(Icons.web, color: Colors.blue),
-                    onTap: () {
-                  
-                    },
+                    onTap: () {},
                   );
                 },
               ),
             ),
-                  SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                                   _showLanguagePopup(context);
-                    },
-                    child: Text('Add Student'),
-                  ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                _showLanguagePopup(context);
+              },
+              child: Text('Add Student'),
+            ),
           ],
         ));
   }
 
-
- void _showLanguagePopup(BuildContext context) {
+  void _showLanguagePopup(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -96,7 +93,7 @@ class _StudentState extends State<Student> {
               SizedBox(height: 20),
               TextField(
                 controller: urlController,
-                    keyboardType: TextInputType.name,
+                keyboardType: TextInputType.name,
                 decoration: InputDecoration(
                   labelText: 'student name',
                   border: OutlineInputBorder(),
@@ -105,7 +102,7 @@ class _StudentState extends State<Student> {
               SizedBox(height: 20),
               TextField(
                 controller: urlController,
-                    keyboardType: TextInputType.url,
+                keyboardType: TextInputType.url,
                 decoration: InputDecoration(
                   labelText: 'Website url',
                   border: OutlineInputBorder(),
@@ -114,7 +111,7 @@ class _StudentState extends State<Student> {
               SizedBox(height: 20),
               TextField(
                 controller: urlController,
-                    keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: 'student emailid',
                   border: OutlineInputBorder(),
@@ -130,9 +127,7 @@ class _StudentState extends State<Student> {
               child: Text("CANCEL"),
             ),
             TextButton(
-              onPressed: () async {
-              
-            },
+              onPressed: () async {},
               child: Text("SAVE"),
             ),
           ],
@@ -141,4 +136,3 @@ class _StudentState extends State<Student> {
     );
   }
 }
-

@@ -13,20 +13,18 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers for each field
   TextEditingController fullNameController = TextEditingController();
   TextEditingController urlController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    fetchData(); // Fetch data when the page loads
+    fetchData(); 
   }
 
-  // Fetch user data from Firestore
   void fetchData() async {
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('users') // Make sure 'users' collection exists
+        .collection('users') 
         .doc(widget.userId)
         .get();
 
@@ -38,7 +36,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  // Save updated data to Firestore
   void saveData() async {
     if (_formKey.currentState!.validate()) {
       await FirebaseFirestore.instance
@@ -53,7 +50,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         SnackBar(content: Text('Profile updated successfully')),
       );
 
-      Navigator.of(context).pop(); // Go back to profile view
+      Navigator.of(context).pop(); 
     }
   }
 

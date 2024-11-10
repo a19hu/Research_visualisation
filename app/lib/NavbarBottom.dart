@@ -30,16 +30,16 @@ class _NavbarbottomState extends State<Navbarbottom> {
 
     switch (_selectedIndex) {
       case 0:
-        displayWidget = Homepage(); // Your HomePage widget
+        displayWidget = Homepage(); 
         break;
       case 1:
-        displayWidget = user != null ? Userprofile(): Loginpage(); // Your LoginPage widget
+        displayWidget = user != null ? Userprofile(): Loginpage();
         break;
       case 2:
-        displayWidget = user != null ? Project(): Loginpage(); // Your LoginPage widget
+        displayWidget = user != null ? Project(): Loginpage();
         break;
       default:
-        displayWidget = Homepage(); // Default case
+        displayWidget = Homepage();
     }
 
     return Scaffold(
@@ -50,17 +50,17 @@ class _NavbarbottomState extends State<Navbarbottom> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-            tooltip: 'Home', // Add tooltip if needed
+            tooltip: 'Home', 
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
-            tooltip: 'Profile', // Add tooltip if needed
+            tooltip: 'Profile',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.indeterminate_check_box),
             label: 'Project',
-            tooltip: 'Project', // Add tooltip if needed
+            tooltip: 'Project', 
           )
           
         ],

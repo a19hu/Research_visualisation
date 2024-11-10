@@ -26,7 +26,7 @@ class _SplashscreenState extends State<Splashscreen> {
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: const Color.fromARGB(255, 231, 182, 7),
+          statusBarColor: const Color.fromARGB(255, 255, 255, 255),
           statusBarIconBrightness: Brightness.light,
         ),
         toolbarHeight: 0,
@@ -35,19 +35,19 @@ class _SplashscreenState extends State<Splashscreen> {
           height: double.infinity,
           width: double.infinity,
           padding: EdgeInsets.only(right: 50, left: 50),
-          color: const Color.fromARGB(255, 231, 182, 7),
+          // color: const Color.fromARGB(255, 231, 182, 7),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Center(
-                child: Image.asset('asset/splash.jpeg'),
+                child: Image.asset('assets/logo.png'),
               ),
               Text(
-                "Jayapataka Swami",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+                "RESEARCH VISUALISATION",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               ),
               Text(
-                "Official Mobile App",
+                "IIT Jodhpur",
                 style: TextStyle(fontSize: 20),
               ),
             ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Counter model
 class Counter extends ChangeNotifier {
   int _count = 0;
 
@@ -12,7 +11,6 @@ class Counter extends ChangeNotifier {
   }
 }
 
-// User model
 class User extends ChangeNotifier {
   String _name = "Guest";
 
@@ -25,7 +23,6 @@ class User extends ChangeNotifier {
 }
 
 
-// Language model
 
 class LanguageProvider extends ChangeNotifier {
   String _name = "English";

@@ -13,51 +13,45 @@ driver = GraphDatabase.driver(URI, auth=AUTH)
 @app.route('/users', methods=['GET'])
 def get_users():
     with driver.session() as session:
-        # Fetch all user nodes
         result = session.run("MATCH (u:User) RETURN u.name AS name, u.age AS age")
         users = [{"name": record["name"], "age": record["age"]} for record in result]
         return jsonify(users)
         
 
-@app.route("/add_employee", methods=["POST"])
-def add_employee():
-    name = request.json.get("name")
-    if not name:
-        return jsonify({"error": "Name is required"}), 400
+@app.route('/add_post', methods=['POST'])
+def add_admin():
+    print('enter')
+    # data = request.get_json()
+    # email = data.get('email')
+    # url = data.get('url')
+    # name = data.get('name')
+    # print(data)
 
-    with driver.session(database="neo4j") as session:
-        try:
-            org_id = session.write_transaction(employ_person_tx, name)
-            return jsonify({"message": f"User {name} added to organization {org_id}"}), 201
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+    # query = """
+    # MERGE (u:User {email: $email, name: $name, url: $url})
+    # MERGE (u)-[:HAS_POST]->(p)
+    # RETURN u, p
+    # """
 
-def employ_person_tx(tx, name):
-    # Create Person node
-    tx.run("MERGE (p:Person {name: $name}) RETURN p.name AS name", name=name)
+    # # Execute the query
+    # with driver.session() as session:
+    #     result = session.run(query, email=email, url=url, name=name, post_content=post_content)
+    #     user_node = result.single()["u"]
+    #     post_node = result.single()["p"]
 
-    # Find latest organization and count employees
-    org = tx.run("""
-        MATCH (o:Organization)
-        RETURN o.id AS id, COUNT{(p:Person)-[:WORKS_FOR]->(o)} AS employees_n
-        ORDER BY o.created_date DESC
-        LIMIT 1
-    """).single()
+    # # Return a response
+    # return jsonify({
+    #     "user": {"email": user_node["email"], "name": user_node["name"], "url": user_node["url"]},
+    #     "post": {"content": post_node["content"], "timestamp": post_node["timestamp"]}
+    # })
+    response_data = {
+        "status": "success",
+        "message": "Data received successfully",
+        "data": data  # Echoing back the received data
+    }
 
-    # Add person to organization or create a new one
-    if org and org["employees_n"] < employee_threshold:
-        org_id = org["id"]
-        tx.run("MATCH (o:Organization {id: $org_id}), (p:Person {name: $name}) MERGE (p)-[:WORKS_FOR]->(o)", org_id=org_id, name=name)
-    else:
-        result = tx.run("""
-            MATCH (p:Person {name: $name})
-            CREATE (o:Organization {id: randomuuid(), created_date: datetime()})
-            MERGE (p)-[:WORKS_FOR]->(o)
-            RETURN o.id AS id
-        """, name=name)
-        org_id = result.single()["id"]
-
-    return org_id
+    # Return the JSON response
+    return jsonify(response_data)
 
 
 if __name__ == "__main__":
