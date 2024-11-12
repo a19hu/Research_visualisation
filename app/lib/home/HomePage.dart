@@ -35,7 +35,7 @@ class _HomepageState extends State<Homepage> {
             },
           ),
         )
-        ..loadRequest(Uri.parse("https://devluplabs.iitj.ac.in/familytree/"));
+        ..loadRequest(Uri.parse("https://research-visualisation.vercel.app/"));
     });
   }
 
@@ -59,7 +59,7 @@ class _HomepageState extends State<Homepage> {
             icon: Icon(Icons.arrow_forward_ios_sharp),
             backgroundColor: Colors.blue,
             onPressed: () async {
-              Uri _url = Uri.parse('https://flutter.dev');
+              Uri _url = Uri.parse('https://research-visualisation.vercel.app/');
               if (await launchUrl(_url)) {
               } else {}
             }),

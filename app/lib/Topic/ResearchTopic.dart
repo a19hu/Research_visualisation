@@ -1,17 +1,17 @@
 import 'dart:convert';
-import 'package:app/student/student.dart';
+import 'package:app/project/project.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
-class Project extends StatefulWidget {
-  const Project({super.key});
+class Researchtopic extends StatefulWidget {
+  const Researchtopic({super.key});
 
   @override
-  State<Project> createState() => _ProjectState();
+  State<Researchtopic> createState() => _ResearchtopicState();
 }
 
-class _ProjectState extends State<Project> {
-  final TextEditingController projectController = TextEditingController();
+class _ResearchtopicState extends State<Researchtopic> {
+ final TextEditingController projectController = TextEditingController();
   List<dynamic> mes = [];
   List<Map<String, dynamic>> messages = [];
   String title = "";
@@ -47,7 +47,7 @@ class _ProjectState extends State<Project> {
         appBar: AppBar(
           backgroundColor: Colors.orange,
           title: Text(
-            "Project",
+            "Research Topic",
           ),
           centerTitle: true,
         ),
@@ -71,7 +71,7 @@ class _ProjectState extends State<Project> {
                       //   contant = messages[index]["contant"];
                       // });
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Student()));
+                          MaterialPageRoute(builder: (context) => Project()));
                     },
                   );
                 },

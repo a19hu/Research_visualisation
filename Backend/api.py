@@ -14,18 +14,24 @@ driver = GraphDatabase.driver(URI, auth=AUTH)
 def get_users():
     with driver.session() as session:
         result = session.run("MATCH (u:User) RETURN u.name AS name, u.age AS age")
+        result1 = session.run("MATCH (u:User)-[r1:HAS_POST]->(p:Post) OPTIONAL MATCH (u)-[r2:KNOWS]->(f:User) RETURN u, p, f, type(r1) as postRelationship, type(r2) as knowsRelationship ")
+        print("hii")
+        print(result1)
+        for record in result1:
+            print(record)
         users = [{"name": record["name"], "age": record["age"]} for record in result]
         return jsonify(users)
         
 
+
 @app.route('/add_post', methods=['POST'])
 def add_admin():
     print('enter')
-    # data = request.get_json()
+    data = request.get_json()
     # email = data.get('email')
     # url = data.get('url')
-    # name = data.get('name')
-    # print(data)
+    name = data.get('name')
+    print(data)
 
     # query = """
     # MERGE (u:User {email: $email, name: $name, url: $url})
@@ -47,7 +53,7 @@ def add_admin():
     response_data = {
         "status": "success",
         "message": "Data received successfully",
-        "data": data  # Echoing back the received data
+        # Echoing back the received data
     }
 
     # Return the JSON response
@@ -55,4 +61,4 @@ def add_admin():
 
 
 if __name__ == "__main__":
-    app.run(host='10.23.24.164', port=5000)
+    app.run(host='0.0.0.0', port=5000)

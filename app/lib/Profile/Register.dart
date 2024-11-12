@@ -21,33 +21,23 @@ class _RegisterState extends State<Register> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController urlController = TextEditingController();
   void registerUser() async {
-    final url = Uri.parse('http://10.23.24.164:5000/add_post');
     try {
-      // final credential =
-      //     await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      //   email: emailController.text.trim(),
-      //   password: passwordController.text.trim(),
-      // );
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
-      // await FirebaseFirestore.instance
-      //     .collection('users')
-      //     .doc(credential.user?.uid)
-      //     .set({
-      //   'fullName': nameController.text,
-      //   'email': emailController.text,
-      //   'url': urlController.text,
-      //   'uid': credential.user?.uid
-      // });
-      await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        // 'email': emailController.text,
-        // 'url': urlController.text,
-        'name': nameController.text,
-        // 'post_content': postContentController.text,
-      }),
-    );
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(credential.user?.uid)
+          .set({
+        'fullName': nameController.text,
+        'email': emailController.text,
+        'url': urlController.text,
+        'uid': credential.user?.uid
+      });
+     
         
 
       ScaffoldMessenger.of(context).showSnackBar(
