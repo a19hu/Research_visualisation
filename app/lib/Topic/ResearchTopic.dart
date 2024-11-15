@@ -1,10 +1,7 @@
-import 'dart:convert';
-import 'package:app/NavbarBottom.dart';
+import 'package:app/api/PostData.dart';
+import 'package:app/api/fetchdata.dart';
 import 'package:app/project/project.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class Researchtopic extends StatefulWidget {
   const Researchtopic({super.key});
@@ -16,98 +13,14 @@ class Researchtopic extends StatefulWidget {
 class _ResearchtopicState extends State<Researchtopic> {
   final TextEditingController projectController = TextEditingController();
   List<dynamic> mes = [];
-  List<Map<String, dynamic>> messages = [];
-  String title = "";
-  String date = "";
-  int number = 0;
-  String contant = "";
-  bool AddRemove = false;
-
-  Future<void> PostDatas() async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      print(user?.uid);
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user?.uid)
-          .get();
-
-      await http.post(
-        Uri.parse("http://10.23.24.164:5000/add_post"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          'name': projectController.text,
-          // 'Admin': userDoc['fullName'],
-          // 'Admin_uid': userDoc['uid']
-        }),
-      );
-      projectController.text = "";
-      setState(() {
-        fetchData();
-      });
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => Navbarbottom()),
-      // );
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(' Successful')));
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> connect(String name) async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      await http.post(
-        Uri.parse("http://10.23.24.164:5000/add_topic_prof"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({'name': name, "uid": user?.uid}),
-      );
-      setState(() {
-        AddRemove = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(' Successful')),
-      );
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> deleteRelation(String name) async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      await http.post(
-        Uri.parse("http://10.23.24.164:5000/delete_topic_prof"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({'name': name, "uid": user?.uid}),
-      );
-      setState(() {
-        fetchData();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(' Successful')),
-      );
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
+  final FirebaseFetchingService firebaseService = FirebaseFetchingService();
+  final FirebasePostingService firebasePost = FirebasePostingService();
 
   Future<void> fetchData() async {
-    final url = Uri.parse('http://10.23.24.164:5000/fetchResearchtopic');
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        print(data);
-        setState(() {
-          mes = data;
-        });
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
+    List<dynamic> fetchedData = await firebaseService.fetchResearchData();
+    setState(() {
+      mes = fetchedData;
+    });
   }
 
   @override
@@ -143,14 +56,25 @@ class _ResearchtopicState extends State<Researchtopic> {
                       subtitle: Row(
                         children: [
                           TextButton(
-                            onPressed: () {
-                              connect(mes[index]['name'].toString());
+                            onPressed: () async {
+                              await firebasePost.createResearchData(
+                                  context, mes[index]['name'].toString());
                             },
                             child: Text('Add'),
                           ),
                           TextButton(
-                            onPressed: () {
-                              deleteRelation(mes[index]['name'].toString());
+                            onPressed: () async {
+                              await firebasePost.removeResearchData(
+                                  context, mes[index]['name'].toString());
+                              await fetchData();
+                            },
+                            child: Text('Remove'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await firebasePost.DeleteResearchData(
+                                  context, mes[index]['name'].toString());
+                              await fetchData();
                             },
                             child: Text('Delete'),
                           ),
@@ -189,7 +113,12 @@ class _ResearchtopicState extends State<Researchtopic> {
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      PostDatas();
+                      if (projectController.text.isNotEmpty) {
+                        await firebasePost.PostResearchData(
+                            context, projectController.text);
+                        projectController.text = "";
+                        fetchData();
+                      }
                     },
                     child: Text('Add'),
                   ),

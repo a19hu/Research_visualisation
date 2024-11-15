@@ -1,16 +1,12 @@
-import 'dart:convert';
-import 'package:app/NavbarBottom.dart';
-import 'package:app/Topic/ResearchTopic.dart';
+import 'package:app/api/PostData.dart';
+import 'package:app/api/fetchdata.dart';
 import 'package:app/student/student.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 class Project extends StatefulWidget {
   final String topicname;
 
-  // Constructor to accept 'name' as an argument
   Project(this.topicname);
-
 
   @override
   State<Project> createState() => _ProjectState();
@@ -19,48 +15,15 @@ class Project extends StatefulWidget {
 class _ProjectState extends State<Project> {
   final TextEditingController projectController = TextEditingController();
   List<dynamic> mes = [];
-  List<Map<String, dynamic>> messages = [];
-  String title = "";
-  String date = "";
-  int number = 0;
-  String contant = "";
+  final FirebaseFetchingService firebaseService = FirebaseFetchingService();
+  final FirebasePostingService firebasePost = FirebasePostingService();
 
   Future<void> fetchData() async {
-    final url = Uri.parse('http://10.23.24.164:5000/fetchProject');
-
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        var filteredData = data.where((item) => item['topicname'] == widget.topicname).toList();
-        print(filteredData);
-        setState(() {
-          mes = filteredData;
-        });
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> PostDatas() async {
-    try {
-      await http.post(
-        Uri.parse("http://10.23.24.164:5000/add_project"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(
-            {'name': projectController.text,
-            "topicname":widget.topicname
-          }),
-      );
-      projectController.text = "";
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Navbarbottom()),
-      );
-    } catch (e) {
-      print('Error: $e');
-    }
+    List<dynamic> fetchedData =
+        await firebaseService.fetchPojectData(widget.topicname);
+    setState(() {
+      mes = fetchedData;
+    });
   }
 
   @override
@@ -85,23 +48,41 @@ class _ProjectState extends State<Project> {
               child: ListView.builder(
                 itemCount: mes.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(mes[index]['name'].toString(),
-                        style: TextStyle(fontSize: 16, color: Colors.blue)),
-                    // subtitle: Text(mes[index]['name']!,
-                    //     style: TextStyle(color: Colors.grey)),
-                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.blue),
-                    onTap: () {
-                      // setState(() {
-                      //   title = messages[index]['name']!;
-                      //   date = messages[index]['date']!;
-                      //   number = index;
-                      //   contant = messages[index]["contant"];
-                      // });
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Student(mes[index]['name'].toString())));
-                    },
-                  );
+                  return Container(
+                      color: Colors.grey[200],
+                      margin: EdgeInsets.symmetric(vertical: 4.0),
+                      child: ListTile(
+                        title: Text(mes[index]['name'].toString(),
+                            style: TextStyle(fontSize: 16, color: Colors.blue)),
+                        trailing:
+                            Icon(Icons.arrow_forward_ios, color: Colors.blue),
+                        subtitle: Row(
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              await firebasePost.createProject(
+                                  context, mes[index]['name'].toString());
+                            },
+                            child: Text('Add'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await firebasePost.removeProject(
+                                  context, mes[index]['name'].toString());
+                              await fetchData();
+                            },
+                            child: Text('Remove'),
+                          ),
+                        ],
+                      ),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Student(mes[index]['name'].toString())));
+                        },
+                      ));
                 },
               ),
             ),
@@ -123,7 +104,12 @@ class _ProjectState extends State<Project> {
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      PostDatas();
+                      if (projectController.text.isNotEmpty) {
+                        await firebasePost.PostProjectDatas(
+                            context, projectController.text, widget.topicname);
+                        projectController.text = "";
+                        fetchData();
+                      }
                     },
                     child: Text('Add'),
                   ),

@@ -1,8 +1,9 @@
+import 'package:app/api/PostData.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfilePage extends StatefulWidget {
-  final String userId; 
+  final String userId;
 
   EditProfilePage({required this.userId});
 
@@ -15,16 +16,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   TextEditingController fullNameController = TextEditingController();
   TextEditingController urlController = TextEditingController();
+  final FirebasePostingService firebasePost = FirebasePostingService();
 
   @override
   void initState() {
     super.initState();
-    fetchData(); 
+    fetchData();
   }
 
   void fetchData() async {
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('users') 
+        .collection('users')
         .doc(widget.userId)
         .get();
 
@@ -45,12 +47,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'fullName': fullNameController.text,
         'url': urlController.text,
       });
+      await firebasePost.updateAdmin(
+          context, fullNameController.text, urlController.text);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Profile updated successfully')),
       );
 
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop();
     }
   }
 
@@ -75,8 +79,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 controller: urlController,
                 decoration: InputDecoration(labelText: "url"),
               ),
-              
-             
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: saveData,

@@ -14,15 +14,12 @@ CORS(app, resources={
 driver = GraphDatabase.driver(URI, auth=AUTH)
 
 def serialize_path(path):
-    # Extract nodes and relationships
     nodes = [node for node in path.nodes]
     relationships = [rel for rel in path.relationships]
     
-    # Serialize the nodes and relationships (you can customize this as needed)
     serialized_nodes = [{"labels": list(node.labels), "properties": dict(node)} for node in nodes]
     serialized_relationships = [{"type": rel.type, "properties": dict(rel)} for rel in relationships]
     
-    # Return the serialized data
     return {
         "nodes": serialized_nodes,
         "relationships": serialized_relationships
@@ -31,17 +28,18 @@ def serialize_path(path):
 @app.route('/fetchtree', methods=['GET'])
 def get_tree():
     with driver.session() as session:
-        # Run your queries
-        result1 = session.run("MATCH p=()-[r:ENROLLED_IN]->() RETURN p LIMIT 25")
-        result2 = session.run("MATCH p=()-[r:RESEARCH_PROJECT]->() RETURN p LIMIT 25")
-        result3 = session.run("MATCH p=()-[r:ADVISED_BY]->() RETURN p LIMIT 25")
+        result1 = session.run("MATCH p=()-[r:topic_prof]->() RETURN p ")
+        result2 = session.run("MATCH p=()-[r:PROJECT_BY]->() RETURN p ")
+        result3 = session.run("MATCH p=()-[r:ENROLLED_IN]->() RETURN p")
+
+
+MATCH (t:Movie{title:"Toy Story"})<-[:ACTED_IN]-(a:Actor)-[:ACTED_IN]->(m:Movie) RETURN a.name, m.title
+
         
-        # Serialize the paths
         data1 = [serialize_path(record["p"]) for record in result1]
         data2 = [serialize_path(record["p"]) for record in result2]
         data3 = [serialize_path(record["p"]) for record in result3]
 
-    # Combine the data
     combined_data = data1 + data2 + data3
 
     response = {
@@ -52,13 +50,8 @@ def get_tree():
 
     return jsonify(response)
 
-@app.route('/users', methods=['GET'])
-def get_users():
-    with driver.session() as session:
-        result = session.run("MATCH (u:User) RETURN u.name AS name, u.age AS age")
-        result1 = session.run("MATCH (u:User)-[r1:HAS_POST]->(p:Post) OPTIONAL MATCH (u)-[r2:KNOWS]->(f:User) RETURN u, p, f, type(r1) as postRelationship, type(r2) as knowsRelationship ")
-        users = [{"name": record["name"], "age": record["age"]} for record in result]
-        return jsonify(users)
+
+# Research Topic api
 
 @app.route('/fetchResearchtopic', methods=['GET'])
 def get_topic():
@@ -67,33 +60,9 @@ def get_topic():
         print(result)
         users = [{"name": record["name"]} for record in result]
         return jsonify(users)
-        
-@app.route('/fetchProject', methods=['GET'])
-def get_Project():
-    with driver.session() as session:
-        result = session.run("""OPTIONAL MATCH (m:Project)
-RETURN 
-  m.name AS name, 
-  m.topicname AS topicname""")
-        print(result)
-        users = [{"name": record["name"], "topicname" : record["topicname"]} for record in result]
-        return jsonify(users)
 
-@app.route('/fetchstudents', methods=['GET'])
-def get_students():
-    print('hii')
-    with driver.session() as session:
-        result = session.run("""OPTIONAL MATCH (m:Students)
-            RETURN 
-                m.name AS name,
-                m.url AS url,
-                m.uid AS uid,
-                m.projectname AS projectname,
-                m.email AS email""")
-        users = [{"name": record["name"], "url" : record["url"],"uid":record["uid"],"email":record["email"],"projectname":record["projectname"]} for record in result]
-        return jsonify(users)
 
-@app.route('/add_topic_prof', methods=['POST'])
+@app.route('/createresearchdata', methods=['POST'])
 def add_topic_prof():
     data = request.get_json()
     name = data.get('name')
@@ -103,28 +72,6 @@ def add_topic_prof():
     MATCH (n:Research_TOPIC {name: $name}), (m:prof {uid: $uid})
     MERGE (n)-[:topic_prof]->(m)
     RETURN n, m
-
-    """
-
-    with driver.session() as session:
-        result = session.run(query, name=name,uid=uid)
-
-    response_data = {
-        "status": "success",
-        "message": "Data received successfully",
-    }
-
-    return jsonify(response_data)
-
-@app.route('/delete_topic_prof', methods=['POST'])
-def delete_topic_prof():
-    data = request.get_json()
-    name = data.get('name')
-    uid=data.get('uid')
-
-    query = """
-    MATCH (n:Research_TOPIC {name: $name})
-    DETACH DELETE n
     """
 
     with driver.session() as session:
@@ -138,7 +85,7 @@ def delete_topic_prof():
     return jsonify(response_data)
 
 
-@app.route('/add_post', methods=['POST'])
+@app.route('/postresearchdata', methods=['POST'])
 def add_research():
     data = request.get_json()
     name = data.get('name')
@@ -156,17 +103,92 @@ def add_research():
 
     return jsonify(response_data)
 
+@app.route('/removesearchdata', methods=['POST'])
+def remove_topic_prof():
+    data = request.get_json()
+    name = data.get('name')
+    uid=data.get('uid')
+    query = """
+    MATCH (n:Research_TOPIC {name: $name})-[r:topic_prof]->(m:prof {uid: $uid})
+    DELETE r
+    RETURN n, m
+    """
+    with driver.session() as session:
+        result = session.run(query, name=name,uid=uid)
 
-@app.route('/add_project', methods=['POST'])
+    response_data = {
+        "status": "success",
+        "message": "Data received successfully",
+    }
+
+    return jsonify(response_data)
+
+@app.route('/deleteresearchdata', methods=['POST'])
+def delete_topic_prof():
+    data = request.get_json()
+    name = data.get('name')
+    uid=data.get('uid')
+    query = """
+    MATCH (n:Research_TOPIC {name: $name})-[r:topic_prof]->(m:prof {uid: $uid})
+    DELETE r,n
+    RETURN n, m
+    """
+    with driver.session() as session:
+        result = session.run(query, name=name,uid=uid)
+
+    response_data = {
+        "status": "success",
+        "message": "Data received successfully",
+    }
+
+    return jsonify(response_data)
+
+
+
+# Project api
+
+
+@app.route('/fetchProject', methods=['GET'])
+def get_Project():
+    with driver.session() as session:
+        result = session.run("""OPTIONAL MATCH (m:Project)
+RETURN 
+  m.name AS name, 
+  m.topicname AS topicname""")
+        print(result)
+        users = [{"name": record["name"], "topicname" : record["topicname"]} for record in result]
+        return jsonify(users)
+
+@app.route('/createproject', methods=['POST'])
+def add_topic_project():
+    data = request.get_json()
+    name = data.get('name')
+    uid=data.get('uid')
+
+    query = """
+    MATCH (n:Project {name: $name}), (m:prof {uid: $uid})
+    MERGE (n)-[:PROJECT_BY]->(m)
+    RETURN n, m
+    """
+
+    with driver.session() as session:
+        result = session.run(query, name=name,uid=uid)
+
+    response_data = {
+        "status": "success",
+        "message": "Data received successfully",
+    }
+
+    return jsonify(response_data)
+
+
+@app.route('/postproject', methods=['POST'])
 def add_project():
     data = request.get_json()
     name = data.get('name')
-    topicname=data.get('topicname')
+    topicname=data.get("topicname")
     query = """
-    CREATE (n:Project {name: $name, topicname: $topicname})
-    WITH n
-    MATCH (p:Research_TOPIC {name: $topicname})
-    CREATE (n)-[:RESEARCH_PROJECT]->(p)
+    CREATE (n:Project {name: $name,topicname:$topicname})
     RETURN n
     """
     with driver.session() as session:
@@ -178,6 +200,91 @@ def add_project():
     }
 
     return jsonify(response_data)
+
+@app.route('/removeproject', methods=['POST'])
+def remove_project():
+    data = request.get_json()
+    name = data.get('name')
+    uid=data.get('uid')
+    query = """
+    MATCH (n:Project {name: $name})-[r:PROJECT_BY]->(m:prof {uid: $uid})
+    DELETE r
+    RETURN n, m
+    """
+    with driver.session() as session:
+        result = session.run(query, name=name,uid=uid)
+
+    response_data = {
+        "status": "success",
+        "message": "Data received successfully",
+    }
+
+    return jsonify(response_data)
+
+
+# Student api
+
+
+
+@app.route('/fetchstudents', methods=['GET'])
+def get_students():
+    with driver.session() as session:
+        result = session.run("""OPTIONAL MATCH (m:Students)
+RETURN m.name AS name,m.url AS url, m.uid AS uid,m.projectname AS projectname,m.email AS email""")
+        users = [{"name": record["name"], "url" : record["url"],"uid":record["uid"],"email":record["email"],"projectname":record["projectname"]} for record in result]
+        return jsonify(users)
+
+
+@app.route('/add_student', methods=['POST'])
+def add_student():
+    data = request.get_json()
+    name = data.get('name')
+    url=data.get('url')
+    email=data.get('email')
+    uid= data.get('uid')
+    projectname = data.get('projectname')
+    query = """
+    CREATE (n:Students {name: $name, url: $url, email: $email,uid:$uid,projectname:$projectname})
+    WITH n
+    MATCH (p:Project {name: $projectname}),
+    (m:prof {uid: $uid}) 
+    MERGE (n)-[:ENROLLED_IN]->(p)
+    MERGE (p)-[:PROJECT_BY]->(m)
+    RETURN n
+    """
+    with driver.session() as session:
+        result = session.run(query, name=name ,email=email,url=url,uid=uid,projectname=projectname)
+
+    response_data = {
+        "status": "success",
+        "message": "Data received successfully",
+    }
+
+    return jsonify(response_data)
+
+@app.route('/removestudent', methods=['POST'])
+def remove_student():
+    data = request.get_json()
+    name = data.get('name')
+    email=data.get('email')
+    projectname=data.get('projectname')
+    print(name,email,projectname)
+    query = """
+    MATCH (n:Students {name: $name,email:$email,projectname:$projectname})-[r:ENROLLED_IN]->(m:Project)
+    DELETE r,n
+    RETURN n, m
+    """
+    with driver.session() as session:
+        result = session.run(query, name=name,projectname=projectname,email=email)
+
+    response_data = {
+        "status": "success",
+        "message": "Data received successfully",
+    }
+
+    return jsonify(response_data)
+
+# Admin api
 
 @app.route('/add_admin', methods=['POST'])
 def add_admin():
@@ -201,30 +308,20 @@ def add_admin():
     return jsonify(response_data)
 
 
-@app.route('/add_student', methods=['POST'])
-def add_student():
+@app.route('/updateadmin', methods=['POST'])
+def update_admin():
     data = request.get_json()
     name = data.get('name')
+    uid=data.get('uid')
     url=data.get('url')
-    email=data.get('email')
-    uid= data.get('uid')
-    projectname = data.get('projectname')
     query = """
-    CREATE (n:Students {name: $name, url: $url, email: $email,uid:$uid,projectname:$projectname})
-    WITH n
-
-MATCH (p:Project {name: $projectname}), 
-      (prof:prof {uid: $uid})
-
-CREATE (n)-[:ENROLLED_IN]->(p)
-CREATE (n)-[:ADVISED_BY]->(prof)
-CREATE (prof)-[:PROJECT_BY]->(p)
-
-
-RETURN n
+    MERGE (n:prof {uid: $uid})
+    ON CREATE SET n.name = $name, n.url = $url
+    ON MATCH SET n.name = $name, n.url = $url
+    RETURN n
     """
     with driver.session() as session:
-        result = session.run(query, name=name ,email=email,url=url,uid=uid,projectname=projectname)
+        result = session.run(query, name=name ,uid=uid,url=url)
 
     response_data = {
         "status": "success",
@@ -235,6 +332,8 @@ RETURN n
 
 
 
+
+
 if __name__ == "__main__":
-    # app.run(host='10.23.24.164', port=5000)
-    app.run(debug=true)
+    app.run(host='10.23.24.164', port=5000)
+    # app.run(debug=true)

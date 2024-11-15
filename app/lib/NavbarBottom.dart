@@ -2,7 +2,6 @@ import 'package:app/Profile/LoginPage.dart';
 import 'package:app/Profile/UserProfile.dart';
 import 'package:app/Topic/ResearchTopic.dart';
 import 'package:app/home/HomePage.dart';
-import 'package:app/project/project.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
