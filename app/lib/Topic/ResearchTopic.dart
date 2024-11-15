@@ -42,10 +42,15 @@ class _ResearchtopicState extends State<Researchtopic> {
         }),
       );
       projectController.text = "";
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Navbarbottom()),
-      );
+      setState(() {
+        fetchData();
+      });
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => Navbarbottom()),
+      // );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(' Successful')));
     } catch (e) {
       print('Error: $e');
     }
@@ -78,6 +83,9 @@ class _ResearchtopicState extends State<Researchtopic> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({'name': name, "uid": user?.uid}),
       );
+      setState(() {
+        fetchData();
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(' Successful')),
       );
@@ -153,7 +161,9 @@ class _ResearchtopicState extends State<Researchtopic> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  Project(mes[index]['name'].toString())),
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  Project(mes[index]['name'].toString())),
                         );
                       },
                     ),

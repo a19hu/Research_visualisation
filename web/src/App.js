@@ -11,8 +11,9 @@ function App() {
  useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://devluplabs.iitj.ac.in/ftadmin/tree/`);
-        setData(response.data);
+        const response = await axios.get(`http://10.23.24.164:5000/fetchtree`);
+        // setData(response.data);
+        console.log(response.data)
       } catch (error) {
         seterror(true)
       }

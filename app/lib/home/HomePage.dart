@@ -48,7 +48,6 @@ class _HomepageState extends State<Homepage> {
             style: TextStyle(color: Colors.white),
           ),
           systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarColor: const Color.fromARGB(255, 0, 0, 0),
             statusBarIconBrightness: Brightness.light,
           ),
           backgroundColor: const Color.fromARGB(255, 28, 149, 205),

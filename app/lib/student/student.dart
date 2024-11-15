@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Student extends StatefulWidget {
-  const Student({super.key});
+  final String projectname;
+
+
+  // Constructor to accept 'name' as an argument
+  Student(this.projectname);
 
   @override
   State<Student> createState() => _StudentState();
@@ -24,14 +29,16 @@ class _StudentState extends State<Student> {
   String contant = "";
 
   Future<void> fetchData() async {
-    final url = Uri.parse('http://10.23.24.164:5000/users');
+    final url = Uri.parse('http://10.23.24.164:5000/fetchstudents');
     try {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        var filteredData = data.where((item) => item['projectname'] == widget.projectname).toList();
+        print(data);
         setState(() {
-          mes = data;
+          mes = filteredData;
         });
       }
     } catch (e) {
@@ -40,6 +47,8 @@ class _StudentState extends State<Student> {
   }
 
   Future<void> PostDatas() async {
+      User? user = FirebaseAuth.instance.currentUser;
+
     try {
       await http.post(
         Uri.parse("http://10.23.24.164:5000/add_student"),
@@ -47,7 +56,9 @@ class _StudentState extends State<Student> {
         body: jsonEncode({
           'name': nameController.text,
           "url": urlController.text,
-          "email": emailController.text
+          "email": emailController.text,
+          "projectname":widget.projectname,
+          "uid":user?.uid,
         }),
       );
       projectController.text = "";
@@ -79,23 +90,28 @@ class _StudentState extends State<Student> {
                 itemCount: mes.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(mes[index]['age'].toString(),
+                    title: Text(mes[index]['name'].toString(),
                         style: TextStyle(fontSize: 16, color: Colors.blue)),
-                    subtitle: Text(mes[index]['name']!,
-                        style: TextStyle(color: Colors.grey)),
+                    subtitle: FirebaseAuth.instance.currentUser?.uid ==
+                            mes[index]['uid']
+                        ? ElevatedButton(
+                            onPressed: () async {
+                              
+                            },
+                            child: Text("Remove"),
+                          )
+                        : Container(),
                     trailing: IconButton(
                         onPressed: () async {
-                          final String email = emailController.text;
-                          final String subject = 'Subject: Project Details';
+                          final String email = mes[index]["email"];
+                          final String subject = 'Project Details';
                           final String body =
-                              'Student Name: ${nameController.text}\n'
-                              'Website URL: ${urlController.text}';
-
+                              'Student Name: ${mes[index]['name']}\n'
+                              'Website URL: ${mes[index]["url"]}';
                           final Uri emailUri = Uri(
                             scheme: 'mailto',
                             path: email,
-                            query:
-                                'subject=$subject&body=$body', 
+                            query: 'subject=$subject&body=$body',
                           );
 
                           if (await launchUrl(emailUri)) {
@@ -106,8 +122,7 @@ class _StudentState extends State<Student> {
                           color: Colors.blue,
                         )),
                     onTap: () async {
-                      Uri _url = Uri.parse(
-                          'https://research-visualisation.vercel.app/');
+                      Uri _url = Uri.parse(mes[index]["url"]);
                       if (await launchUrl(_url)) {
                       } else {}
                     },
@@ -177,6 +192,7 @@ class _StudentState extends State<Student> {
             TextButton(
               onPressed: () async {
                 PostDatas();
+                Navigator.of(context).pop();
               },
               child: Text("SAVE"),
             ),

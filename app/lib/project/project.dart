@@ -1,8 +1,7 @@
 import 'dart:convert';
+import 'package:app/NavbarBottom.dart';
 import 'package:app/Topic/ResearchTopic.dart';
-import 'package:app/provider/Providers.dart';
 import 'package:app/student/student.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -57,7 +56,7 @@ class _ProjectState extends State<Project> {
       projectController.text = "";
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Researchtopic()),
+        MaterialPageRoute(builder: (context) => Navbarbottom()),
       );
     } catch (e) {
       print('Error: $e');
@@ -100,7 +99,7 @@ class _ProjectState extends State<Project> {
                       //   contant = messages[index]["contant"];
                       // });
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Student()));
+                          MaterialPageRoute(builder: (context) => Student(mes[index]['name'].toString())));
                     },
                   );
                 },
