@@ -237,4 +237,4 @@ RETURN n
 
 if __name__ == "__main__":
     # app.run(host='10.23.24.164', port=5000)
-    app.run()
+    app.run(debug=true)
