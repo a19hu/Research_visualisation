@@ -23,10 +23,9 @@ class _UserprofileState extends State<Userprofile> {
   @override
   void initState() {
     super.initState();
-    fetchData(); // Fetch data when the page loads
+    fetchData(); 
   }
 
-  // Fetch user data from Firestore
   void fetchData() async {
     User? user = FirebaseAuth.instance.currentUser;
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -34,7 +33,6 @@ class _UserprofileState extends State<Userprofile> {
         .doc(user?.uid)
         .get();
 
-    print(userDoc);
 
     if (userDoc.exists) {
       setState(() {
@@ -55,14 +53,67 @@ class _UserprofileState extends State<Userprofile> {
           style: TextStyle(color: Colors.white),
         ),
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.orange,
+          statusBarColor: const Color.fromARGB(255, 0, 0, 0),
           statusBarIconBrightness: Brightness.light,
         ),
-        backgroundColor: Colors.yellow,
+        backgroundColor: const Color.fromARGB(255, 28, 149, 205),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  ProfileItem(
+                      icon: Icons.person,
+                      title: "Full Name",
+                      value: fullNameController.text),
+                  ProfileItem(
+                      icon: Icons.email,
+                      title: "Email Address",
+                      value: emailController.text),
+                  ProfileItem(
+                      icon: Icons.web_stories,
+                      title: "Url",
+                      value: urlController.text),
+                  ProfileItem(
+                      icon: Icons.man, title: "ID", value: uidController.text),
+                ],
+              ),
+            ),
+            // SizedBox(height: 10),
+            // ElevatedButton(
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.orange,
+            //     padding: EdgeInsets.symmetric(horizontal: 20),
+            //   ),
+            //   onPressed: () {
+            //     Navigator.pushReplacement(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => Navbarbottom()),
+            //     );
+            //   },
+            //   child: Text(
+            //     "BACK TO HOME",
+            //     style: TextStyle(color: Colors.white),
+            //   ),
+            // ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 28, 149, 205),
+                padding: EdgeInsets.symmetric(horizontal: 20),
+              ),
+              onPressed: () {
+                _showLanguagePopup(context);
+              },
+              child: Text(
+                "RESET PASSWORD",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
             Container(
               width: double.infinity,
               // height: 120,
@@ -71,7 +122,7 @@ class _UserprofileState extends State<Userprofile> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                      backgroundColor: const Color.fromARGB(255, 28, 149, 205),
                       padding: EdgeInsets.symmetric(horizontal: 20),
                     ),
                     onPressed: () {
@@ -97,64 +148,10 @@ class _UserprofileState extends State<Userprofile> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  ProfileItem(
-                      icon: Icons.person,
-                      title: "Full Name",
-                      value: fullNameController.text),
-                  ProfileItem(
-                      icon: Icons.email,
-                      title: "Email Address",
-                      value: emailController.text),
-                  ProfileItem(
-                      icon: Icons.web_stories,
-                      title: "Url",
-                      value: urlController.text),
-                      ProfileItem(
-                      icon: Icons.man,
-                      title: "ID",
-                      value: uidController.text),
-                ],
-              ),
-            ),
             SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-              ),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => Navbarbottom()),
-                );
-              },
-              child: Text(
-                "BACK TO HOME",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-              ),
-              onPressed: () {
-                _showLanguagePopup(context);
-              },
-              child: Text(
-                "RESET PASSWORD",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 28, 149, 205),
                 padding: EdgeInsets.symmetric(horizontal: 20),
               ),
               onPressed: () async {

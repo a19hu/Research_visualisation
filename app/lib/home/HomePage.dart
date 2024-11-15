@@ -48,10 +48,10 @@ class _HomepageState extends State<Homepage> {
             style: TextStyle(color: Colors.white),
           ),
           systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarColor: Colors.orange,
+            statusBarColor: const Color.fromARGB(255, 0, 0, 0),
             statusBarIconBrightness: Brightness.light,
           ),
-          backgroundColor: Colors.yellow,
+          backgroundColor: const Color.fromARGB(255, 28, 149, 205),
           iconTheme: IconThemeData(color: Colors.white),
         ),
         floatingActionButton: FloatingActionButton.extended(

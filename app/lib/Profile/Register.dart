@@ -38,7 +38,16 @@ class _RegisterState extends State<Register> {
         'uid': credential.user?.uid
       });
      
-        
+        await http.post(
+        Uri.parse("http://10.23.24.164:5000/add_admin"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          'name': nameController.text,
+        'email': emailController.text,
+        'url': urlController.text,
+        'uid': credential.user?.uid
+        }),
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registration Successful')),

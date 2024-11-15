@@ -1,10 +1,17 @@
 import 'dart:convert';
+import 'package:app/Topic/ResearchTopic.dart';
+import 'package:app/provider/Providers.dart';
 import 'package:app/student/student.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 class Project extends StatefulWidget {
-  const Project({super.key});
+  final String topicname;
+
+  // Constructor to accept 'name' as an argument
+  Project(this.topicname);
+
 
   @override
   State<Project> createState() => _ProjectState();
@@ -20,16 +27,38 @@ class _ProjectState extends State<Project> {
   String contant = "";
 
   Future<void> fetchData() async {
-    final url = Uri.parse('http://10.23.24.164:5000/users');
+    final url = Uri.parse('http://10.23.24.164:5000/fetchProject');
+
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print(data[0]);
+        var filteredData = data.where((item) => item['topicname'] == widget.topicname).toList();
+        print(filteredData);
         setState(() {
-          mes = data;
+          mes = filteredData;
         });
       }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> PostDatas() async {
+    try {
+      await http.post(
+        Uri.parse("http://10.23.24.164:5000/add_project"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(
+            {'name': projectController.text,
+            "topicname":widget.topicname
+          }),
+      );
+      projectController.text = "";
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Researchtopic()),
+      );
     } catch (e) {
       print('Error: $e');
     }
@@ -45,7 +74,7 @@ class _ProjectState extends State<Project> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.orange,
+          backgroundColor: const Color.fromARGB(255, 28, 149, 205),
           title: Text(
             "Project",
           ),
@@ -58,10 +87,10 @@ class _ProjectState extends State<Project> {
                 itemCount: mes.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(mes[index]['age'].toString(),
+                    title: Text(mes[index]['name'].toString(),
                         style: TextStyle(fontSize: 16, color: Colors.blue)),
-                    subtitle: Text(mes[index]['name']!,
-                        style: TextStyle(color: Colors.grey)),
+                    // subtitle: Text(mes[index]['name']!,
+                    //     style: TextStyle(color: Colors.grey)),
                     trailing: Icon(Icons.arrow_forward_ios, color: Colors.blue),
                     onTap: () {
                       // setState(() {
@@ -94,18 +123,8 @@ class _ProjectState extends State<Project> {
                   ),
                   SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: () async{
-                      print('Button pressed');
-                        await http.post(
-                      Uri.parse("http://10.23.24.164:5000/add_post"),
-                        headers: {"Content-Type": "application/json"},
-                        body: jsonEncode({
-                          // 'email': emailController.text,
-                          // 'url': urlController.text,
-                          'name': projectController.text,
-                          // 'post_content': postContentController.text,
-                        }),
-                      );
+                    onPressed: () async {
+                      PostDatas();
                     },
                     child: Text('Add'),
                   ),

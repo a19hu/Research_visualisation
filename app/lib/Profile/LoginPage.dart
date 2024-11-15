@@ -45,10 +45,10 @@ class _LoginpageState extends State<Loginpage> {
           style: TextStyle(color: Colors.white),
         ),
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.orange,
+          statusBarColor: const Color.fromARGB(255, 0, 0, 0),
           statusBarIconBrightness: Brightness.light,
         ),
-        backgroundColor: Colors.yellow,
+        backgroundColor: const Color.fromARGB(255, 28, 149, 205),
         // actions: [
         //   IconButton(
         //       onPressed: () {
@@ -116,7 +116,7 @@ class _LoginpageState extends State<Loginpage> {
                 onPressed: _signIn,
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-                  backgroundColor: Colors.orange,
+                  backgroundColor: const Color.fromARGB(255, 28, 149, 205),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),

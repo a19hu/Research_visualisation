@@ -66,7 +66,7 @@ class _NavbarbottomState extends State<Navbarbottom> {
           
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: const Color.fromARGB(255, 28, 149, 205),
         unselectedItemColor: const Color.fromARGB(255, 31, 31, 31),
         onTap: _onItemTapped,
       ),

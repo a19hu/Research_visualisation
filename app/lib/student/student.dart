@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Student extends StatefulWidget {
   const Student({super.key});
@@ -11,7 +12,9 @@ class Student extends StatefulWidget {
 
 class _StudentState extends State<Student> {
   final TextEditingController projectController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController urlController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   List<dynamic> mes = [];
   List<Map<String, dynamic>> messages = [];
@@ -36,6 +39,23 @@ class _StudentState extends State<Student> {
     }
   }
 
+  Future<void> PostDatas() async {
+    try {
+      await http.post(
+        Uri.parse("http://10.23.24.164:5000/add_student"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          'name': nameController.text,
+          "url": urlController.text,
+          "email": emailController.text
+        }),
+      );
+      projectController.text = "";
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +66,7 @@ class _StudentState extends State<Student> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.orange,
+          backgroundColor: const Color.fromARGB(255, 28, 149, 205),
           title: Text(
             "Student",
           ),
@@ -63,8 +83,34 @@ class _StudentState extends State<Student> {
                         style: TextStyle(fontSize: 16, color: Colors.blue)),
                     subtitle: Text(mes[index]['name']!,
                         style: TextStyle(color: Colors.grey)),
-                    trailing: Icon(Icons.web, color: Colors.blue),
-                    onTap: () {},
+                    trailing: IconButton(
+                        onPressed: () async {
+                          final String email = emailController.text;
+                          final String subject = 'Subject: Project Details';
+                          final String body =
+                              'Student Name: ${nameController.text}\n'
+                              'Website URL: ${urlController.text}';
+
+                          final Uri emailUri = Uri(
+                            scheme: 'mailto',
+                            path: email,
+                            query:
+                                'subject=$subject&body=$body', 
+                          );
+
+                          if (await launchUrl(emailUri)) {
+                          } else {}
+                        },
+                        icon: Icon(
+                          Icons.email,
+                          color: Colors.blue,
+                        )),
+                    onTap: () async {
+                      Uri _url = Uri.parse(
+                          'https://research-visualisation.vercel.app/');
+                      if (await launchUrl(_url)) {
+                      } else {}
+                    },
                   );
                 },
               ),
@@ -89,31 +135,33 @@ class _StudentState extends State<Student> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Enter your email to receive the reset link."),
-              SizedBox(height: 20),
+              // Text("Enter your email to receive the reset link."),
               TextField(
-                controller: urlController,
+                controller:
+                    nameController, // Use the controller for the student name
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
-                  labelText: 'student name',
+                  labelText: 'Student Name',
                   border: OutlineInputBorder(),
                 ),
               ),
               SizedBox(height: 20),
               TextField(
-                controller: urlController,
+                controller:
+                    urlController, // Use the controller for the website URL
                 keyboardType: TextInputType.url,
                 decoration: InputDecoration(
-                  labelText: 'Website url',
+                  labelText: 'Website URL',
                   border: OutlineInputBorder(),
                 ),
               ),
               SizedBox(height: 20),
               TextField(
-                controller: urlController,
+                controller:
+                    emailController, // Use the controller for the student email
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: 'student emailid',
+                  labelText: 'Student Email ID',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -127,7 +175,9 @@ class _StudentState extends State<Student> {
               child: Text("CANCEL"),
             ),
             TextButton(
-              onPressed: () async {},
+              onPressed: () async {
+                PostDatas();
+              },
               child: Text("SAVE"),
             ),
           ],
