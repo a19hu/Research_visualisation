@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from neo4j import GraphDatabase
 from flask_cors import CORS
-
+import neo4j
 app = Flask(__name__)
 URI = "neo4j://10.6.0.63:7687"
 AUTH = ("neo4j", "neo4j@123")
@@ -13,42 +13,87 @@ CORS(app, resources={
 
 driver = GraphDatabase.driver(URI, auth=AUTH)
 
-def serialize_path(path):
-    nodes = [node for node in path.nodes]
-    relationships = [rel for rel in path.relationships]
-    
-    serialized_nodes = [{"labels": list(node.labels), "properties": dict(node)} for node in nodes]
-    serialized_relationships = [{"type": rel.type, "properties": dict(rel)} for rel in relationships]
-    
-    return {
-        "nodes": serialized_nodes,
-        "relationships": serialized_relationships
-    }
-
 @app.route('/fetchtree', methods=['GET'])
 def get_tree():
     with driver.session() as session:
-        result1 = session.run("MATCH p=()-[r:topic_prof]->() RETURN p ")
-        result2 = session.run("MATCH p=()-[r:PROJECT_BY]->() RETURN p ")
-        result3 = session.run("MATCH p=()-[r:ENROLLED_IN]->() RETURN p")
+        result1 = session.run("""MATCH (research_topic:Research_TOPIC)
+        OPTIONAL MATCH (research_topic)-[:topic_prof]->(prof:prof)
+        OPTIONAL MATCH (prof)-[:PROJECT_BY]->(project:Project)
+        OPTIONAL MATCH (project)-[:ENROLLED_IN]->(student:Students)
+        RETURN research_topic, prof, project, student""")
+        result=build_tree(result1)
+        # for record in result1:
+        #     print(record)
+        #     print("11")
 
-
-MATCH (t:Movie{title:"Toy Story"})<-[:ACTED_IN]-(a:Actor)-[:ACTED_IN]->(m:Movie) RETURN a.name, m.title
-
-        
-        data1 = [serialize_path(record["p"]) for record in result1]
-        data2 = [serialize_path(record["p"]) for record in result2]
-        data3 = [serialize_path(record["p"]) for record in result3]
-
-    combined_data = data1 + data2 + data3
-
-    response = {
+    response_data = {
         "status": "success",
-        "message": "Fetched relationships successfully",
-        "data": combined_data
+        "message": "Data received successfully",
+        "data":result
     }
 
-    return jsonify(response)
+    return jsonify(response_data)
+
+def build_tree(data):
+    tree = {}
+    for record in data:
+        # Get or create the research topic node
+        research_topic_name = record["research_topic"]["name"]
+        if research_topic_name not in tree:
+            tree[research_topic_name] = {"name": research_topic_name, "children": []}
+
+        # Handle professor if exists
+        if record["prof"]:
+            professor_uid = record["prof"]["uid"]
+            professor_data = {
+                "uid": professor_uid,
+                "name": record["prof"]["name"],
+                "url": record["prof"]["url"],
+                "email": record["prof"]["email"],
+                "children": [],
+            }
+
+            # Check if the professor already exists in the tree
+            professor_in_tree = next(
+                (prof for prof in tree[research_topic_name]["children"] if prof["uid"] == professor_uid), None
+            )
+            if not professor_in_tree:
+                tree[research_topic_name]["children"].append(professor_data)
+                professor_in_tree = professor_data
+
+            # Handle project if exists
+            if record["project"]:
+                project_name = record["project"]["name"]
+                project_data = {
+                    "name": project_name,
+                    "topicname": record["project"]["topicname"],
+                    "children": [],
+                }
+
+                # Check if the project already exists under the professor
+                project_in_tree = next(
+                    (proj for proj in professor_in_tree["children"] if proj["name"] == project_name), None
+                )
+                if not project_in_tree:
+                    professor_in_tree["children"].append(project_data)
+                    project_in_tree = project_data
+
+                # Handle student if exists
+                if record["student"]:
+                    student_uid = record["student"]["uid"]
+                    student_data = {
+                        "uid": student_uid,
+                        "name": record["student"]["name"],
+                        "projectname": record["student"]["projectname"],
+                        "url": record["student"]["url"],
+                        "email": record["student"]["email"],
+                    }
+
+                    # Check if the student already exists under the project
+                    if student_data not in project_in_tree["children"]:
+                        project_in_tree["children"].append(student_data)
+
+    return tree
 
 
 # Research Topic api
@@ -152,10 +197,9 @@ def delete_topic_prof():
 def get_Project():
     with driver.session() as session:
         result = session.run("""OPTIONAL MATCH (m:Project)
-RETURN 
-  m.name AS name, 
-  m.topicname AS topicname""")
-        print(result)
+        RETURN 
+        m.name AS name, 
+        m.topicname AS topicname""")
         users = [{"name": record["name"], "topicname" : record["topicname"]} for record in result]
         return jsonify(users)
 
@@ -167,7 +211,7 @@ def add_topic_project():
 
     query = """
     MATCH (n:Project {name: $name}), (m:prof {uid: $uid})
-    MERGE (n)-[:PROJECT_BY]->(m)
+    MERGE (m)-[:PROJECT_BY]->(n)
     RETURN n, m
     """
 
@@ -207,7 +251,7 @@ def remove_project():
     name = data.get('name')
     uid=data.get('uid')
     query = """
-    MATCH (n:Project {name: $name})-[r:PROJECT_BY]->(m:prof {uid: $uid})
+    MATCH (n:Project {name: $name})<-[r:PROJECT_BY]-(m:prof {uid: $uid})
     DELETE r
     RETURN n, m
     """
@@ -248,8 +292,8 @@ def add_student():
     WITH n
     MATCH (p:Project {name: $projectname}),
     (m:prof {uid: $uid}) 
-    MERGE (n)-[:ENROLLED_IN]->(p)
-    MERGE (p)-[:PROJECT_BY]->(m)
+    MERGE (p)-[:ENROLLED_IN]->(n)
+    MERGE (m)-[:PROJECT_BY]->(p)
     RETURN n
     """
     with driver.session() as session:
@@ -270,7 +314,7 @@ def remove_student():
     projectname=data.get('projectname')
     print(name,email,projectname)
     query = """
-    MATCH (n:Students {name: $name,email:$email,projectname:$projectname})-[r:ENROLLED_IN]->(m:Project)
+    MATCH (n:Students {name: $name,email:$email,projectname:$projectname})<-[r:ENROLLED_IN]-(m:Project)
     DELETE r,n
     RETURN n, m
     """

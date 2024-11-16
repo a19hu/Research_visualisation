@@ -19,7 +19,7 @@ export default function Home({data}) {
       <div className="home" style={mystyle} >
       </div>
      <div className="typewriterStyle" >
-        {/* <DTree data={data}/>   */}
+        <DTree data={data}/>  
     </div>
       </>
   )

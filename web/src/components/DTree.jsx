@@ -12,13 +12,15 @@ const DTree = ({ data }) => {
 
   const new_data = []
   const all_parent = {
-    name: 'All',
+    name: 'Research Visualisation',
     children: []
   }
+  data = Object.values(data);
   data.forEach(item => {
     all_parent.children.push(item);
   });
   new_data.push(all_parent)
+  console.log(new_data)
 
   const renderCustom = ({ nodeDatum, toggleNode, links }) => {
     const str = nodeDatum.name
@@ -81,19 +83,19 @@ const DTree = ({ data }) => {
         zoom={1.5}
         zoomable={true}
         linkClassName={"custom-link"}
-        depthFactor={500}
-        linkProps={getLinkProps}
-        // initialDepth={2}
+        // depthFactor={500}
+        // linkProps={getLinkProps}
+        initialDepth={1}
         // pathFunc="straight"
-        nodeSize={{ x: 100, y: 20 }}
-        translate={{ x: 200, y: 530 }}
+        nodeSize={{ x: 100, y: 60 }}
+        translate={{ x: 900, y: 530 }}
         // draggable={false}
-        dimensions={dimensions}
+        // dimensions={dimensions}
         orientation={"vertical"}
-        // pathClassFunc={() => 'custom-link'}
-        renderCustomNodeElement={renderCustom}
-        transitionDuration={500}
-        shouldCollapseNeighborNodes={true}
+        pathClassFunc={() => 'custom-link'}
+        // renderCustomNodeElement={renderCustom}
+        // transitionDuration={500}
+        shouldCollapseNeighborNodes={false}
         separation={{ siblings: 2, nonSiblings: 2 }}
       // renderCustomLinkElement={renderCustomLink}
 

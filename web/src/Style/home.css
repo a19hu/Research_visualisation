@@ -3,10 +3,13 @@
   position: relative;
  }
  .typewriterStyle{
-  position: absolute;
+position: absolute;
 top: 4%;
 width: 99%;
 height: 96vh;
+display: flex;
+align-items: center;
+justify-content: center;
 }
 
 .help{
