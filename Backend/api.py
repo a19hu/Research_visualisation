@@ -8,7 +8,7 @@ AUTH = ("neo4j", "neo4j@123")
 employee_threshold = 10
 
 CORS(app, resources={
-    r"/*": {"origins": ["http://localhost:3000","http://10.23.24.164:3000","https://research-visualisation.vercel.app/"]}
+    r"/*": {"origins": ["http://localhost:3000","http://10.23.24.164:3000","https://research-visualisation.vercel.app","http://10.6.0.63:3000/"]}
 })
 
 driver = GraphDatabase.driver(URI, auth=AUTH)
@@ -39,6 +39,8 @@ def build_tree(data):
     for record in data:
         # Get or create the research topic node
         research_topic_name = record["research_topic"]["name"]
+        
+        # Create the research topic node if it doesn't exist
         if research_topic_name not in tree:
             tree[research_topic_name] = {"name": research_topic_name, "children": []}
 
@@ -61,37 +63,41 @@ def build_tree(data):
                 tree[research_topic_name]["children"].append(professor_data)
                 professor_in_tree = professor_data
 
-            # Handle project if exists
+            # Handle project if exists and its topic matches the research topic
             if record["project"]:
                 project_name = record["project"]["name"]
-                project_data = {
-                    "name": project_name,
-                    "topicname": record["project"]["topicname"],
-                    "children": [],
-                }
-
-                # Check if the project already exists under the professor
-                project_in_tree = next(
-                    (proj for proj in professor_in_tree["children"] if proj["name"] == project_name), None
-                )
-                if not project_in_tree:
-                    professor_in_tree["children"].append(project_data)
-                    project_in_tree = project_data
-
-                # Handle student if exists
-                if record["student"]:
-                    student_uid = record["student"]["uid"]
-                    student_data = {
-                        "uid": student_uid,
-                        "name": record["student"]["name"],
-                        "projectname": record["student"]["projectname"],
-                        "url": record["student"]["url"],
-                        "email": record["student"]["email"],
+                project_topicname = record["project"]["topicname"]
+                
+                # Only add project if the topicname matches the research_topic_name
+                if project_topicname == research_topic_name:
+                    project_data = {
+                        "name": project_name,
+                        "topicname": project_topicname,
+                        "children": [],
                     }
 
-                    # Check if the student already exists under the project
-                    if student_data not in project_in_tree["children"]:
-                        project_in_tree["children"].append(student_data)
+                    # Check if the project already exists under the professor
+                    project_in_tree = next(
+                        (proj for proj in professor_in_tree["children"] if proj["name"] == project_name), None
+                    )
+                    if not project_in_tree:
+                        professor_in_tree["children"].append(project_data)
+                        project_in_tree = project_data
+
+                    # Handle student if exists
+                    if record["student"]:
+                        student_uid = record["student"]["uid"]
+                        student_data = {
+                            "uid": student_uid,
+                            "name": record["student"]["name"],
+                            "projectname": record["student"]["projectname"],
+                            "url": record["student"]["url"],
+                            "email": record["student"]["email"],
+                        }
+
+                        # Check if the student already exists under the project
+                        if student_data not in project_in_tree["children"]:
+                            project_in_tree["children"].append(student_data)
 
     return tree
 
@@ -379,5 +385,5 @@ def update_admin():
 
 
 if __name__ == "__main__":
-    app.run(host='10.23.24.164', port=5000)
+    app.run(host='10.23.25.97', port=5000)
     # app.run(debug=true)
