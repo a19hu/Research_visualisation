@@ -36,6 +36,7 @@ def get_tree():
 
 def build_tree(data):
     tree = {}
+
     for record in data:
         # Get or create the research topic node
         research_topic_name = record["research_topic"]["name"]
@@ -46,7 +47,7 @@ def build_tree(data):
 
         # Handle professor if exists
         if record["prof"]:
-            professor_uid = record["prof"]["uid"]
+            professor_uid = record["prof"]["uid"]  # Shared uid for both professor and student
             professor_data = {
                 "uid": professor_uid,
                 "name": record["prof"]["name"],
@@ -84,19 +85,22 @@ def build_tree(data):
                         professor_in_tree["children"].append(project_data)
                         project_in_tree = project_data
 
-                    # Handle student if exists
+                    # Handle student if exists and associate with the same `uid` as the professor
                     if record["student"]:
-                        student_uid = record["student"]["uid"]
+                        student_uid = record["student"]["uid"]  # Same `uid` as professor
                         student_data = {
-                            "uid": student_uid,
+                            "uid": student_uid,  # Shared UID for student and professor
                             "name": record["student"]["name"],
                             "projectname": record["student"]["projectname"],
                             "url": record["student"]["url"],
                             "email": record["student"]["email"],
                         }
 
-                        # Check if the student already exists under the project
-                        if student_data not in project_in_tree["children"]:
+                        # Check if the student already exists under the project (using shared UID)
+                        student_in_project = next(
+                            (stu for stu in project_in_tree["children"] if stu["uid"] == student_uid), None
+                        )
+                        if not student_in_project:
                             project_in_tree["children"].append(student_data)
 
     return tree
@@ -385,5 +389,5 @@ def update_admin():
 
 
 if __name__ == "__main__":
-    app.run(host='10.23.25.97', port=5000)
+    app.run(host='10.6.0.63', port=5000)
     # app.run(debug=true)

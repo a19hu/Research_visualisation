@@ -33,7 +33,7 @@ class _HomepageState extends State<Homepage> {
           },
         ),
       )
-      ..loadRequest(Uri.parse("https://research-visualisation.vercel.app"));
+      ..loadRequest(Uri.parse("https://research-visualisation.vercel.app/"));
   }
 
   @override
@@ -55,7 +55,7 @@ class _HomepageState extends State<Homepage> {
             icon: Icon(Icons.arrow_forward_ios_sharp),
             backgroundColor: Colors.blue,
             onPressed: () async {
-              Uri _url = Uri.parse('https://research-visualisation.vercel.app/');
+              Uri _url = Uri.parse('http://10.6.0.63:3000');
               if (await launchUrl(_url)) {
               } else {}
             }),
