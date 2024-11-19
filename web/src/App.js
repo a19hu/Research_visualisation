@@ -11,7 +11,7 @@ function App() {
  useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://10.23.25.97:5000/fetchtree`);
+        const response = await axios.get(`http://10.6.0.63:5000/fetchtree`);
         setData(response.data.data);
       } catch (error) {
         seterror(true)
