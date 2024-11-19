@@ -8,7 +8,7 @@ AUTH = ("neo4j", "neo4j@123")
 employee_threshold = 10
 
 CORS(app, resources={
-    r"/*": {"origins": ["http://localhost:3000","http://10.23.24.164:3000","https://research-visualisation.vercel.app","http://10.6.0.63:3000/"]}
+    r"/*": {"origins": ["http://localhost:3000","http://10.23.24.164:3000","https://research-visualisation.vercel.app","http://10.6.0.63:3000"]}
 })
 
 driver = GraphDatabase.driver(URI, auth=AUTH)
