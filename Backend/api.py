@@ -47,7 +47,7 @@ def build_tree(data):
 
         # Handle professor if exists
         if record["prof"]:
-            professor_uid = record["prof"]["uid"]  # Shared uid for both professor and student
+            professor_uid = record["prof"]["uid"]
             professor_data = {
                 "uid": professor_uid,
                 "name": record["prof"]["name"],
@@ -64,11 +64,11 @@ def build_tree(data):
                 tree[research_topic_name]["children"].append(professor_data)
                 professor_in_tree = professor_data
 
-            # Handle project if exists and its topic matches the research topic
+            # Handle project if exists
             if record["project"]:
                 project_name = record["project"]["name"]
                 project_topicname = record["project"]["topicname"]
-                
+
                 # Only add project if the topicname matches the research_topic_name
                 if project_topicname == research_topic_name:
                     project_data = {
@@ -85,18 +85,18 @@ def build_tree(data):
                         professor_in_tree["children"].append(project_data)
                         project_in_tree = project_data
 
-                    # Handle student if exists and associate with the same `uid` as the professor
-                    if record["student"]:
-                        student_uid = record["student"]["uid"]  # Same `uid` as professor
+                    # Handle student if exists
+                    if record["student"] and record["prof"]["uid"] == record["student"]["uid"]:
+                        student_uid = record["student"]["uid"]
                         student_data = {
-                            "uid": student_uid,  # Shared UID for student and professor
+                            "uid": student_uid,
                             "name": record["student"]["name"],
                             "projectname": record["student"]["projectname"],
                             "url": record["student"]["url"],
                             "email": record["student"]["email"],
                         }
 
-                        # Check if the student already exists under the project (using shared UID)
+                        # Check if the student already exists under the project
                         student_in_project = next(
                             (stu for stu in project_in_tree["children"] if stu["uid"] == student_uid), None
                         )
