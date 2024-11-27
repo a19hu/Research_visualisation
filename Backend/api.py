@@ -38,14 +38,11 @@ def build_tree(data):
     tree = {}
 
     for record in data:
-        # Get or create the research topic node
         research_topic_name = record["research_topic"]["name"]
         
-        # Create the research topic node if it doesn't exist
         if research_topic_name not in tree:
             tree[research_topic_name] = {"name": research_topic_name, "children": []}
 
-        # Handle professor if exists
         if record["prof"]:
             professor_uid = record["prof"]["uid"]
             professor_data = {
@@ -56,7 +53,6 @@ def build_tree(data):
                 "children": [],
             }
 
-            # Check if the professor already exists in the tree
             professor_in_tree = next(
                 (prof for prof in tree[research_topic_name]["children"] if prof["uid"] == professor_uid), None
             )
@@ -64,12 +60,10 @@ def build_tree(data):
                 tree[research_topic_name]["children"].append(professor_data)
                 professor_in_tree = professor_data
 
-            # Handle project if exists
             if record["project"]:
                 project_name = record["project"]["name"]
                 project_topicname = record["project"]["topicname"]
 
-                # Only add project if the topicname matches the research_topic_name
                 if project_topicname == research_topic_name:
                     project_data = {
                         "name": project_name,
@@ -77,7 +71,6 @@ def build_tree(data):
                         "children": [],
                     }
 
-                    # Check if the project already exists under the professor
                     project_in_tree = next(
                         (proj for proj in professor_in_tree["children"] if proj["name"] == project_name), None
                     )
@@ -85,7 +78,6 @@ def build_tree(data):
                         professor_in_tree["children"].append(project_data)
                         project_in_tree = project_data
 
-                    # Handle student if exists
                     if record["student"] and record["prof"]["uid"] == record["student"]["uid"]:
                         student_uid = record["student"]["uid"]
                         student_data = {
@@ -96,7 +88,6 @@ def build_tree(data):
                             "email": record["student"]["email"],
                         }
 
-                        # Check if the student already exists under the project
                         student_in_project = next(
                             (stu for stu in project_in_tree["children"] if stu["uid"] == student_uid), None
                         )
@@ -389,5 +380,5 @@ def update_admin():
 
 
 if __name__ == "__main__":
-    app.run(host='10.6.0.63', port=5000)
+    app.run(host='0.0.0.0', port=5000)
     # app.run(debug=true)
